@@ -13,6 +13,9 @@ dist/
 .DS_Store
 Thumbs.db
 
+# Docs (local only)
+docs/
+
 # Daemon runtime
 *.sock
 *.pid
