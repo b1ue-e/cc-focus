@@ -16,12 +16,20 @@ type Config struct {
 	Hook struct {
 		SocketPath string `toml:"socket_path"`
 	} `toml:"hook"`
+	Monitor struct {
+		Enabled      bool   `toml:"enabled"`
+		ProcessName  string `toml:"process_name"`
+		PollInterval int    `toml:"poll_interval"`
+	} `toml:"monitor"`
 }
 
 func defaultConfig() Config {
 	cfg := Config{}
 	cfg.Terminal.Name = "Ghostty"
 	cfg.Hook.SocketPath = socketPath()
+	cfg.Monitor.Enabled = true
+	cfg.Monitor.ProcessName = "claude"
+	cfg.Monitor.PollInterval = 1
 	return cfg
 }
 

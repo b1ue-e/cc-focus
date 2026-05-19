@@ -137,6 +137,8 @@ func runDaemon(sockPath string) {
 
 	log.Printf("daemon listening on %s", sockPath)
 
+	startMonitor(cfg)
+
 	for {
 		conn, err := listener.Accept()
 		if err != nil {

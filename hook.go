@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 type ccSettings struct {
@@ -50,18 +51,24 @@ func cmdInstall() {
 		settings.Hooks = make(map[string][]stopHookGroup)
 	}
 
-	for _, g := range settings.Hooks["Stop"] {
-		for _, h := range g.Hooks {
-			if h.Command == notifyPath {
-				fmt.Println("hook already installed")
-				return
+	events := []string{"Stop", "PermissionRequest"}
+	for _, event := range events {
+		found := false
+		for _, g := range settings.Hooks[event] {
+			for _, h := range g.Hooks {
+				if h.Command == notifyPath {
+					found = true
+					break
+				}
 			}
+		}
+		if !found {
+			settings.Hooks[event] = append(settings.Hooks[event], group)
 		}
 	}
 
-	settings.Hooks["Stop"] = append(settings.Hooks["Stop"], group)
 	saveSettings(settingsPath, settings)
-	fmt.Printf("hook installed: Stop → %s\n", notifyPath)
+	fmt.Printf("hooks installed: %s → %s\n", strings.Join(events, ", "), notifyPath)
 }
 
 func cmdUninstall() {
@@ -74,23 +81,26 @@ func cmdUninstall() {
 	settingsPath := ccSettingsPath()
 	settings := loadSettings(settingsPath)
 
-	var kept []stopHookGroup
-	for _, g := range settings.Hooks["Stop"] {
-		var keptHooks []hookCommand
-		for _, h := range g.Hooks {
-			if h.Command != notifyPath {
-				keptHooks = append(keptHooks, h)
+	events := []string{"Stop", "PermissionRequest"}
+	for _, event := range events {
+		var kept []stopHookGroup
+		for _, g := range settings.Hooks[event] {
+			var keptHooks []hookCommand
+			for _, h := range g.Hooks {
+				if h.Command != notifyPath {
+					keptHooks = append(keptHooks, h)
+				}
+			}
+			if len(keptHooks) > 0 {
+				g.Hooks = keptHooks
+				kept = append(kept, g)
 			}
 		}
-		if len(keptHooks) > 0 {
-			g.Hooks = keptHooks
-			kept = append(kept, g)
-		}
+		settings.Hooks[event] = kept
 	}
 
-	settings.Hooks["Stop"] = kept
 	saveSettings(settingsPath, settings)
-	fmt.Println("hook uninstalled")
+	fmt.Println("hooks uninstalled")
 }
 
 func loadSettings(path string) ccSettings {
