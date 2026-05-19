@@ -10,17 +10,14 @@
 
 ## cc-focus
 
-Auto-focus your terminal when Claude Code stops — response complete, permission needed, any time CC waits for you. Browse elsewhere without missing a beat.
+Auto-focus your terminal when Claude Code stops — response complete, permission needed, any time CC waits for you. Browse elsewhere without missing a beat. Also tracks token usage with live stats in the CC status bar.
 
-### How it works
+### Features
 
-```
-CC Stop/PermissionRequest hook → notify.sh → Unix socket → daemon → activate terminal
-```
-
-Claude Code fires `Stop` and `PermissionRequest` hooks when it needs your attention. `notify.sh` forwards the event to a lightweight daemon, which brings your terminal to the front.
-
-If your CC setup doesn't support hooks, a built-in process polling monitor detects when CC transitions from running to waiting.
+- **Auto-focus** — terminal comes to front on `Stop` and `PermissionRequest` hooks
+- **Token stats** — track input/output/cache tokens per session via `cc-focus stats`
+- **Status bar** — live token usage displayed in CC's bottom status line
+- **Process monitor** — built-in polling fallback for setups without hook support
 
 ### Install
 
@@ -37,8 +34,24 @@ cc-focus start                        # starts the daemon
 | `cc-focus start` | Start daemon in background |
 | `cc-focus stop` | Stop daemon |
 | `cc-focus status` | Show daemon status and config |
-| `cc-focus install` | Add Stop + PermissionRequest hooks to Claude Code settings |
+| `cc-focus stats` | Show token usage per session with cost estimate |
+| `cc-focus install` | Add Stop + PermissionRequest hooks to CC settings |
 | `cc-focus uninstall` | Remove hooks |
+| `cc-focus` | Show usage |
+
+### Stats output
+
+```
+🎯 9c826a15 | ↩10 | ↓2900 ↑5560 ⇗1217280 | $0.0236 | deepseek-v4-pro
+```
+
+| Symbol | Meaning |
+|--------|---------|
+| `↩` | Conversation turns |
+| `↓` | Input tokens |
+| `↑` | Output tokens |
+| `⇗` | Cache hit tokens |
+| `$` | Estimated cost (auto-detects model pricing) |
 
 ### Config
 
@@ -69,17 +82,14 @@ poll_interval = 1         # polling interval in seconds
 
 ## cc-focus
 
-Claude Code 停下来等你时，自动将终端切回前台 — 响应完成、请求权限、任何需要你介入的时刻。放心切到别处浏览。
+Claude Code 停下来等你时自动将终端切回前台，同时追踪 token 用量并在终端状态栏实时显示。
 
-### 原理
+### 功能
 
-```
-CC Stop/PermissionRequest hook → notify.sh → Unix socket → daemon → 激活终端
-```
-
-Claude Code 在响应完成（`Stop`）和请求权限（`PermissionRequest`）时触发 hook。`notify.sh` 将事件转发给后台 daemon，daemon 检测并激活终端。
-
-如果 CC 环境不支持 hooks，内置的进程状态轮询会检测 CC 从运行态切换到等待态。
+- **自动聚焦** — 响应完成和请求权限时终端自动弹回前台
+- **用量统计** — `cc-focus stats` 按 session 查看输入/输出/缓存 tokens
+- **状态栏** — CC 终端底部实时显示 token 消耗和费用
+- **进程监控** — 对不支持 hooks 的环境提供轮询兜底
 
 ### 安装
 
@@ -96,8 +106,24 @@ cc-focus start                        # 启动 daemon
 | `cc-focus start` | 后台启动 daemon |
 | `cc-focus stop` | 停止 daemon |
 | `cc-focus status` | 查看运行状态和配置 |
+| `cc-focus stats` | 查看 token 用量和费用估算 |
 | `cc-focus install` | 添加 Stop + PermissionRequest hook |
 | `cc-focus uninstall` | 移除 hooks |
+| `cc-focus` | 显示用法 |
+
+### 统计输出
+
+```
+🎯 9c826a15 | ↩10 | ↓2900 ↑5560 ⇗1217280 | $0.0236 | deepseek-v4-pro
+```
+
+| 符号 | 含义 |
+|------|------|
+| `↩` | 对话轮次 |
+| `↓` | 输入 tokens |
+| `↑` | 输出 tokens |
+| `⇗` | 缓存命中 tokens |
+| `$` | 预估费用（自动检测模型定价） |
 
 ### 配置
 
