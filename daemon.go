@@ -15,7 +15,21 @@ import (
 )
 
 type Event struct {
-	Reason string `json:"stop_reason"`
+	SessionID            string `json:"session_id"`
+	TranscriptPath       string `json:"transcript_path"`
+	Cwd                  string `json:"cwd"`
+	HookEventName        string `json:"hook_event_name"`
+	StopHookActive       bool   `json:"stop_hook_active"`
+	LastAssistantMessage string `json:"last_assistant_message"`
+
+	Usage *TurnUsage `json:"-"` // populated from transcript
+}
+
+type TurnUsage struct {
+	InputTokens  int    `json:"input_tokens"`
+	OutputTokens int    `json:"output_tokens"`
+	CacheTokens  int    `json:"cache_read_input_tokens"`
+	Model        string `json:"model"`
 }
 
 func cmdStart() {
@@ -161,10 +175,13 @@ func handleConnection(conn net.Conn, cfg Config, logPath string) {
 			continue
 		}
 
-		log.Printf("event=%s activating terminal: %s", event.Reason, cfg.Terminal.Name)
+		log.Printf("event=%s activating terminal: %s", event.HookEventName, cfg.Terminal.Name)
 		if err := activateTerminal(cfg); err != nil {
 			log.Printf("activate: %v", err)
 		}
+
+		enrichUsage(&event)
+		saveStats(&event)
 
 		logEvent(logPath, event)
 	}

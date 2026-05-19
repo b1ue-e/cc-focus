@@ -11,8 +11,9 @@ Usage:
   cc-focus start       Start the daemon
   cc-focus stop        Stop the daemon
   cc-focus status      Show daemon status and config
-  cc-focus install     Install Stop hook into Claude Code settings
-  cc-focus uninstall   Remove Stop hook from Claude Code settings
+  cc-focus stats       Show token usage statistics
+  cc-focus install     Install Stop + PermissionRequest hooks into CC settings
+  cc-focus uninstall   Remove Stop + PermissionRequest hooks from CC settings
 `
 
 func main() {
@@ -33,6 +34,8 @@ func main() {
 		cmdStop()
 	case "status":
 		cmdStatus()
+	case "stats":
+		cmdStats()
 	case "install":
 		cmdInstall()
 	case "uninstall":
