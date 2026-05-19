@@ -8,10 +8,16 @@ import (
 )
 
 type ccSettings struct {
-	Hooks map[string][]hookEntry `json:"hooks"`
+	Hooks map[string][]stopHookGroup `json:"hooks"`
 }
 
-type hookEntry struct {
+type stopHookGroup struct {
+	Matcher string        `json:"matcher"`
+	Hooks   []hookCommand `json:"hooks"`
+}
+
+type hookCommand struct {
+	Type    string `json:"type"`
 	Command string `json:"command"`
 }
 
@@ -37,20 +43,23 @@ func cmdInstall() {
 	settingsPath := ccSettingsPath()
 	settings := loadSettings(settingsPath)
 
-	entry := hookEntry{Command: notifyPath}
-	existing := settings.Hooks["Stop"]
-	for _, e := range existing {
-		if e.Command == notifyPath {
-			fmt.Println("hook already installed")
-			return
+	cmd := hookCommand{Type: "command", Command: notifyPath}
+	group := stopHookGroup{Matcher: "", Hooks: []hookCommand{cmd}}
+
+	if settings.Hooks == nil {
+		settings.Hooks = make(map[string][]stopHookGroup)
+	}
+
+	for _, g := range settings.Hooks["Stop"] {
+		for _, h := range g.Hooks {
+			if h.Command == notifyPath {
+				fmt.Println("hook already installed")
+				return
+			}
 		}
 	}
 
-	if settings.Hooks == nil {
-		settings.Hooks = make(map[string][]hookEntry)
-	}
-	settings.Hooks["Stop"] = append(settings.Hooks["Stop"], entry)
-
+	settings.Hooks["Stop"] = append(settings.Hooks["Stop"], group)
 	saveSettings(settingsPath, settings)
 	fmt.Printf("hook installed: Stop → %s\n", notifyPath)
 }
@@ -65,15 +74,21 @@ func cmdUninstall() {
 	settingsPath := ccSettingsPath()
 	settings := loadSettings(settingsPath)
 
-	existing := settings.Hooks["Stop"]
-	filtered := make([]hookEntry, 0, len(existing))
-	for _, e := range existing {
-		if e.Command != notifyPath {
-			filtered = append(filtered, e)
+	var kept []stopHookGroup
+	for _, g := range settings.Hooks["Stop"] {
+		var keptHooks []hookCommand
+		for _, h := range g.Hooks {
+			if h.Command != notifyPath {
+				keptHooks = append(keptHooks, h)
+			}
+		}
+		if len(keptHooks) > 0 {
+			g.Hooks = keptHooks
+			kept = append(kept, g)
 		}
 	}
 
-	settings.Hooks["Stop"] = filtered
+	settings.Hooks["Stop"] = kept
 	saveSettings(settingsPath, settings)
 	fmt.Println("hook uninstalled")
 }
