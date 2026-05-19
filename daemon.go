@@ -112,6 +112,11 @@ func runDaemon(sockPath string) {
 	cfg, _ := loadConfig()
 	logPath := filepath.Join(cacheDir(), "events.log")
 
+	logFile, err := os.OpenFile(filepath.Join(cacheDir(), "daemon.log"), os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err == nil {
+		log.SetOutput(logFile)
+	}
+
 	os.Remove(sockPath)
 	listener, err := net.Listen("unix", sockPath)
 	if err != nil {
@@ -154,17 +159,9 @@ func handleConnection(conn net.Conn, cfg Config, logPath string) {
 			continue
 		}
 
-		focused, err := isTerminalFocused(cfg)
-		if err != nil {
-			log.Printf("foreground check: %v", err)
-			continue
-		}
-
-		if !focused {
-			if err := activateTerminal(cfg); err != nil {
-				log.Printf("activate: %v", err)
-				continue
-			}
+		log.Printf("event=%s activating terminal: %s", event.Reason, cfg.Terminal.Name)
+		if err := activateTerminal(cfg); err != nil {
+			log.Printf("activate: %v", err)
 		}
 
 		logEvent(logPath, event)
