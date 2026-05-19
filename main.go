@@ -43,5 +43,3 @@ func main() {
 	}
 }
 
-func cmdInstall()  { fmt.Println("install: not implemented") }
-func cmdUninstall() { fmt.Println("uninstall: not implemented") }
