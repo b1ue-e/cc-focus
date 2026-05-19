@@ -16,6 +16,11 @@ Usage:
 `
 
 func main() {
+	if len(os.Args) >= 3 && os.Args[1] == "--daemon" {
+		runDaemon(os.Args[2])
+		return
+	}
+
 	if len(os.Args) < 2 {
 		fmt.Print(usage)
 		os.Exit(1)
@@ -38,8 +43,5 @@ func main() {
 	}
 }
 
-func cmdStart()    { fmt.Println("start: not implemented") }
-func cmdStop()     { fmt.Println("stop: not implemented") }
-func cmdStatus()   { fmt.Println("status: not implemented") }
 func cmdInstall()  { fmt.Println("install: not implemented") }
 func cmdUninstall() { fmt.Println("uninstall: not implemented") }
