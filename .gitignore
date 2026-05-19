@@ -1,0 +1,18 @@
+# Binary
+cc-focus
+cc-focus-*
+
+# Build artifacts
+dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Daemon runtime
+*.sock
+*.pid
